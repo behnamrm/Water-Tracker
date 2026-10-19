@@ -1,9 +1,12 @@
 package io.github.behnamrm.watertracker.data
 
 import androidx.room.withTransaction
-import io.github.behnamrm.watertracker.util.intakesToCsv
+import io.github.behnamrm.watertracker.util.CsvExport
 import kotlinx.coroutines.flow.Flow
 import org.json.JSONArray
+import java.time.LocalDate
+import java.time.temporal.WeekFields
+import java.util.Locale
 import org.json.JSONException
 import org.json.JSONObject
 
@@ -75,8 +78,12 @@ class WaterRepository(
             .toString()
     }
 
-    /** All drinks as CSV text, one row per drink, for spreadsheets and charts. */
-    suspend fun exportCsv(): String = intakesToCsv(intakeDao.getAllWithType())
+    /** The CSV files for charts (file name to content); see [CsvExport]. */
+    suspend fun exportCsvFiles(): List<Pair<String, String>> = CsvExport.files(
+        intakeDao.getAllWithType(),
+        today = LocalDate.now(),
+        firstDayOfWeek = WeekFields.of(Locale.getDefault()).firstDayOfWeek,
+    )
 
     /** Replaces all local data with the content of a backup made by [exportJson]. */
     suspend fun importJson(json: String) {

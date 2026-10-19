@@ -42,6 +42,7 @@
 
     <!-- Stats -->
     <string name="stats_title">Statistics</string>
+    <string name="stats_hourly">Hourly</string>
     <string name="stats_daily">Daily</string>
     <string name="stats_weekly">Weekly</string>
     <string name="stats_previous">Previous period</string>
@@ -51,6 +52,10 @@
     <string name="stats_best_day">Best day</string>
     <string name="stats_best_week">Best week</string>
     <string name="stats_goal_days_caption">days the goal was reached</string>
+    <string name="stats_per_hour">Per hour</string>
+    <string name="stats_busiest_hour">Busiest</string>
+    <string name="stats_drinks">Drinks</string>
+    <string name="stats_of_daily_goal">of your %1$s daily goal</string>
     <string name="stats_per_day">Per day</string>
     <string name="stats_per_week">Per week</string>
     <string name="stats_by_type">By drink type</string>
@@ -86,9 +91,9 @@
     <string name="backup_import_done">Backup imported</string>
     <string name="backup_error">Something went wrong: %1$s</string>
     <string name="csv_title">Data for charts</string>
-    <string name="csv_desc">Export every drink as a text file (CSV: date, time, drink type, amount in ml). It opens in Excel, Google Sheets or any tool you use for charts.</string>
+    <string name="csv_desc">Saves a folder of text files (CSV) for Excel, Google Sheets or any chart tool: every drink with its exact date and time, drink type and amount, plus your hourly, daily and weekly totals per drink type. Pick where the folder should go.</string>
     <string name="csv_export">Export as text (CSV)</string>
-    <string name="csv_export_done">Data exported</string>
+    <string name="csv_export_done">Saved to folder %1$s</string>
     <string name="backup_import_confirm_title">Import backup?</string>
     <string name="backup_import_confirm_message">This replaces all drinks, drink types and settings on this phone with the ones in the backup file you pick next.</string>
 </resources>

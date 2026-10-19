@@ -25,7 +25,8 @@ import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.ui.unit.sp
 import io.github.behnamrm.watertracker.ui.theme.MonoStyle
 import io.github.behnamrm.watertracker.util.formatVolumeShort
@@ -43,10 +44,13 @@ fun BarChart(bars: List<ChartBar>, goalMl: Int?, modifier: Modifier = Modifier) 
     val colors = MaterialTheme.colorScheme
     val goalColor = colors.secondary
 
+    // Many bars (24 hours) get thinner bars, tighter spacing and no value labels.
+    val dense = bars.size > 12
+    val spacing = if (dense) 2.dp else 6.dp
     Column(modifier.fillMaxWidth()) {
         Box(Modifier.fillMaxWidth().height(BarAreaHeight + ValueLabelHeight)) {
             Row(
-                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                horizontalArrangement = Arrangement.spacedBy(spacing),
                 verticalAlignment = Alignment.Bottom,
                 modifier = Modifier.fillMaxSize(),
             ) {
@@ -55,7 +59,7 @@ fun BarChart(bars: List<ChartBar>, goalMl: Int?, modifier: Modifier = Modifier) 
                     val height by animateDpAsState(target, label = "bar")
                     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.weight(1f)) {
                         Text(
-                            if (bar.valueMl > 0) formatVolumeShort(bar.valueMl) else "",
+                            if (bar.valueMl > 0 && !dense) formatVolumeShort(bar.valueMl) else "",
                             style = MonoStyle.copy(fontSize = 10.sp),
                             color = colors.onSurfaceVariant,
                             maxLines = 1,
@@ -66,7 +70,8 @@ fun BarChart(bars: List<ChartBar>, goalMl: Int?, modifier: Modifier = Modifier) 
                         Box(
                             contentAlignment = Alignment.BottomCenter,
                             modifier = Modifier
-                                .width(BarWidth)
+                                .fillMaxWidth(if (dense) 0.8f else 1f)
+                                .widthIn(max = BarWidth)
                                 .height(BarAreaHeight)
                                 .clip(CircleShape)
                                 .background(colors.surfaceContainerHigh),
@@ -75,7 +80,7 @@ fun BarChart(bars: List<ChartBar>, goalMl: Int?, modifier: Modifier = Modifier) 
                                 Box(
                                     Modifier
                                         .fillMaxWidth()
-                                        .height(maxOf(height, BarWidth))
+                                        .height(maxOf(height, 6.dp))
                                         .clip(CircleShape)
                                         .background(if (bar.highlighted) colors.secondary else colors.primary),
                                 )
@@ -97,7 +102,7 @@ fun BarChart(bars: List<ChartBar>, goalMl: Int?, modifier: Modifier = Modifier) 
                 }
             }
         }
-        Row(horizontalArrangement = Arrangement.spacedBy(6.dp), modifier = Modifier.padding(top = 6.dp)) {
+        Row(horizontalArrangement = Arrangement.spacedBy(spacing), modifier = Modifier.padding(top = 6.dp)) {
             bars.forEach { bar ->
                 Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.weight(1f)) {
                     Text(
@@ -105,7 +110,9 @@ fun BarChart(bars: List<ChartBar>, goalMl: Int?, modifier: Modifier = Modifier) 
                         style = MaterialTheme.typography.labelMedium,
                         color = if (bar.highlighted) colors.secondary else colors.onSurface,
                         maxLines = 1,
+                        softWrap = false,
                         textAlign = TextAlign.Center,
+                        modifier = Modifier.wrapContentWidth(unbounded = true),
                     )
                     Text(
                         bar.sublabel,

@@ -93,7 +93,7 @@ fun SettingsScreen(
     val importLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
         uri?.let(viewModel::importFrom)
     }
-    val csvLauncher = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("text/csv")) { uri ->
+    val csvLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri ->
         uri?.let(viewModel::exportCsvTo)
     }
     LaunchedEffect(viewModel) {
@@ -180,7 +180,7 @@ fun SettingsScreen(
                 state = state,
                 onExport = { exportLauncher.launch(viewModel.exportFileName()) },
                 onImport = { dialog = SettingsDialog.ConfirmImport },
-                onExportCsv = { csvLauncher.launch(viewModel.csvFileName()) },
+                onExportCsv = { csvLauncher.launch(null) },
             )
         }
     }

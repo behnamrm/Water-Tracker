@@ -94,4 +94,35 @@ class StatsCalculatorTest {
         assertEquals(800f / 1400, stats.byType[0].fraction, 0.001f)
         assertEquals(600f / 1400, stats.byType[1].fraction, 0.001f)
     }
+
+    @Test
+    fun hourlyPagesAreSingleDays() {
+        assertEquals(DateRange(today, today.plusDays(1)), StatsCalculator.pageRange(StatsMode.Hourly, 0, today, DayOfWeek.MONDAY))
+        assertEquals(
+            DateRange(today.minusDays(2), today.minusDays(1)),
+            StatsCalculator.pageRange(StatsMode.Hourly, 2, today, DayOfWeek.MONDAY),
+        )
+    }
+
+    @Test
+    fun hourlyBucketsSumPerHourOfTheDay() {
+        val range = StatsCalculator.pageRange(StatsMode.Hourly, 0, today, DayOfWeek.MONDAY)
+        val intakes = listOf(
+            intake(LocalDateTime.of(2026, 10, 21, 8, 0), 250),
+            intake(LocalDateTime.of(2026, 10, 21, 8, 59), 100),
+            intake(LocalDateTime.of(2026, 10, 21, 23, 30), 500),
+            intake(LocalDateTime.of(2026, 10, 20, 8, 30), 999), // yesterday
+        )
+        val stats = StatsCalculator.compute(StatsMode.Hourly, range, intakes, goalMl = 800, today = today, zone = zone)
+
+        assertEquals(24, stats.buckets.size)
+        assertEquals((0 until 24).toList(), stats.buckets.map { it.hour })
+        assertEquals(350, stats.buckets[8].totalMl)
+        assertEquals(500, stats.buckets[23].totalMl)
+        assertEquals(0, stats.buckets[12].totalMl)
+        assertEquals(850, stats.totalMl)
+        assertEquals(3, stats.drinkCount)
+        assertEquals(23, stats.best?.hour)
+        assertEquals(1, stats.goalDays)
+    }
 }

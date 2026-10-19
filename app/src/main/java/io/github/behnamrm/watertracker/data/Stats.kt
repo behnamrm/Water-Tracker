@@ -7,7 +7,7 @@ import java.time.ZoneId
 import java.time.temporal.ChronoUnit
 import java.time.temporal.TemporalAdjusters
 
-enum class StatsMode { Daily, Weekly }
+enum class StatsMode { Hourly, Daily, Weekly }
 
 /** A half-open date range [start, endExclusive). */
 data class DateRange(val start: LocalDate, val endExclusive: LocalDate) {
@@ -17,7 +17,8 @@ data class DateRange(val start: LocalDate, val endExclusive: LocalDate) {
     operator fun contains(date: LocalDate) = !date.isBefore(start) && date.isBefore(endExclusive)
 }
 
-data class Bucket(val range: DateRange, val totalMl: Int)
+/** One bar: a day or week, or with [hour] set, one hour of [range]'s day. */
+data class Bucket(val range: DateRange, val totalMl: Int, val hour: Int? = null)
 
 data class TypeShare(val name: String, val emoji: String, val totalMl: Int, val fraction: Float)
 
@@ -32,6 +33,7 @@ data class PeriodStats(
     val goalDays: Int,
     val elapsedDays: Int,
     val byType: List<TypeShare>,
+    val drinkCount: Int,
 )
 
 object StatsCalculator {
@@ -42,11 +44,15 @@ object StatsCalculator {
         date.with(TemporalAdjusters.previousOrSame(firstDayOfWeek))
 
     /**
-     * The date range shown on a page. Page 0 ends with the current day (daily) or the current
-     * week (weekly); each higher page goes one full page further back in time.
+     * The date range shown on a page. Page 0 is today (hourly), ends with today (daily) or ends
+     * with the current week (weekly); each higher page goes one full page further back in time.
      */
     fun pageRange(mode: StatsMode, page: Int, today: LocalDate, firstDayOfWeek: DayOfWeek): DateRange =
         when (mode) {
+            StatsMode.Hourly -> {
+                val day = today.minusDays(page.toLong())
+                DateRange(day, day.plusDays(1))
+            }
             StatsMode.Daily -> {
                 val end = today.plusDays(1).minusDays(DAYS_PER_PAGE.toLong() * page)
                 DateRange(end.minusDays(DAYS_PER_PAGE.toLong()), end)
@@ -65,28 +71,34 @@ object StatsCalculator {
         today: LocalDate,
         zone: ZoneId,
     ): PeriodStats {
+        val inRange = intakes.filter { Instant.ofEpochMilli(it.timestamp).atZone(zone).toLocalDate() in range }
         val perDay = HashMap<LocalDate, Int>()
-        for (intake in intakes) {
+        for (intake in inRange) {
             val date = Instant.ofEpochMilli(intake.timestamp).atZone(zone).toLocalDate()
-            if (date in range) perDay.merge(date, intake.amountMl, Int::plus)
+            perDay.merge(date, intake.amountMl, Int::plus)
         }
 
-        val step = if (mode == StatsMode.Daily) 1L else 7L
-        val buckets = generateSequence(range.start) { it.plusDays(step) }
-            .takeWhile { it.isBefore(range.endExclusive) }
-            .map { start ->
-                val bucketRange = DateRange(start, start.plusDays(step))
-                Bucket(bucketRange, perDay.filterKeys { it in bucketRange }.values.sum())
-            }
-            .toList()
+        val buckets = if (mode == StatsMode.Hourly) {
+            val perHour = IntArray(24)
+            inRange.forEach { perHour[Instant.ofEpochMilli(it.timestamp).atZone(zone).hour] += it.amountMl }
+            (0 until 24).map { Bucket(range, perHour[it], hour = it) }
+        } else {
+            val step = if (mode == StatsMode.Daily) 1L else 7L
+            generateSequence(range.start) { it.plusDays(step) }
+                .takeWhile { it.isBefore(range.endExclusive) }
+                .map { start ->
+                    val bucketRange = DateRange(start, start.plusDays(step))
+                    Bucket(bucketRange, perDay.filterKeys { it in bucketRange }.values.sum())
+                }
+                .toList()
+        }
 
         val total = perDay.values.sum()
         val elapsedEnd = minOf(range.endExclusive, today.plusDays(1))
         val elapsedDays = ChronoUnit.DAYS.between(range.start, elapsedEnd).coerceAtLeast(0).toInt()
         val goalDays = perDay.count { (date, ml) -> date.isBefore(elapsedEnd) && goalMl > 0 && ml >= goalMl }
 
-        val byType = intakes
-            .filter { Instant.ofEpochMilli(it.timestamp).atZone(zone).toLocalDate() in range }
+        val byType = inRange
             .groupBy { it.drinkTypeId }
             .map { (_, list) ->
                 val sum = list.sumOf { it.amountMl }
@@ -108,6 +120,7 @@ object StatsCalculator {
             goalDays = goalDays,
             elapsedDays = elapsedDays,
             byType = byType,
+            drinkCount = inRange.size,
         )
     }
 }

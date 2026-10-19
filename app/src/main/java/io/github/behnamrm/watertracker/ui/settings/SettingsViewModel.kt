@@ -2,6 +2,7 @@ package io.github.behnamrm.watertracker.ui.settings
 
 import android.app.Application
 import android.net.Uri
+import android.provider.DocumentsContract
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import io.github.behnamrm.watertracker.R
@@ -21,6 +22,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.FileNotFoundException
+import java.io.IOException
 import java.time.LocalDate
 
 data class SettingsUiState(
@@ -68,7 +70,7 @@ class SettingsViewModel(
     fun exportFileName() = "WaterTracker-backup-${LocalDate.now()}.json"
 
     /** Writes a backup to a file the user picked. */
-    fun exportTo(uri: Uri) = runBackupTask(R.string.backup_export_done) {
+    fun exportTo(uri: Uri) = runBackupTask({ app.getString(R.string.backup_export_done) }) {
         val json = repository.exportJson()
         withContext(Dispatchers.IO) {
             val stream = app.contentResolver.openOutputStream(uri, "wt") ?: throw FileNotFoundException(uri.toString())
@@ -77,20 +79,31 @@ class SettingsViewModel(
         settings.setLastExportAt(System.currentTimeMillis())
     }
 
-    /** Suggested name for a CSV data export. */
-    fun csvFileName() = "WaterTracker-data-${LocalDate.now()}.csv"
-
-    /** Writes all drinks as a CSV text file the user picked. */
-    fun exportCsvTo(uri: Uri) = runBackupTask(R.string.csv_export_done) {
-        val csv = repository.exportCsv()
-        withContext(Dispatchers.IO) {
-            val stream = app.contentResolver.openOutputStream(uri, "wt") ?: throw FileNotFoundException(uri.toString())
-            stream.bufferedWriter().use { it.write(csv) }
+    /**
+     * Creates a `WaterTracker-export-<date>` folder inside the folder the user picked ([treeUri])
+     * and writes the CSV files for charts into it.
+     */
+    fun exportCsvTo(treeUri: Uri) {
+        val folderName = "WaterTracker-export-${LocalDate.now()}"
+        runBackupTask({ app.getString(R.string.csv_export_done, folderName) }) {
+            val files = repository.exportCsvFiles()
+            withContext(Dispatchers.IO) {
+                val resolver = app.contentResolver
+                val parent = DocumentsContract.buildDocumentUriUsingTree(treeUri, DocumentsContract.getTreeDocumentId(treeUri))
+                val folder = DocumentsContract.createDocument(resolver, parent, DocumentsContract.Document.MIME_TYPE_DIR, folderName)
+                    ?: throw IOException("Could not create $folderName")
+                for ((name, content) in files) {
+                    val file = DocumentsContract.createDocument(resolver, folder, "text/csv", name)
+                        ?: throw IOException("Could not create $name")
+                    val stream = resolver.openOutputStream(file, "wt") ?: throw FileNotFoundException(name)
+                    stream.bufferedWriter().use { it.write(content) }
+                }
+            }
         }
     }
 
     /** Replaces all data with the backup in a file the user picked. */
-    fun importFrom(uri: Uri) = runBackupTask(R.string.backup_import_done) {
+    fun importFrom(uri: Uri) = runBackupTask({ app.getString(R.string.backup_import_done) }) {
         val json = withContext(Dispatchers.IO) {
             val stream = app.contentResolver.openInputStream(uri) ?: throw FileNotFoundException(uri.toString())
             stream.bufferedReader().use { it.readText() }
@@ -98,13 +111,13 @@ class SettingsViewModel(
         repository.importJson(json)
     }
 
-    private fun runBackupTask(doneMessage: Int, task: suspend () -> Unit) {
+    private fun runBackupTask(doneMessage: () -> String, task: suspend () -> Unit) {
         if (backupBusy.value) return
         backupBusy.value = true
         viewModelScope.launch {
             val message = try {
                 task()
-                app.getString(doneMessage)
+                doneMessage()
             } catch (e: Exception) {
                 app.getString(R.string.backup_error, e.message ?: e.javaClass.simpleName)
             } finally {
