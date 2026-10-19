@@ -10,6 +10,6 @@
         android:pathData="M54,28 C54,28 36,49 36,62 C36,72 44,80 54,80 C64,80 72,72 72,62 C72,49 54,28 54,28 Z" />
     <!-- Highlight -->
     <path
-        android:fillColor="#FF90CAF9"
+        android:fillColor="#FF4AAEEA"
         android:pathData="M46,62 C46,67 49.5,71 54,72 C51,69 50,66 50,62 Z" />
 </vector>

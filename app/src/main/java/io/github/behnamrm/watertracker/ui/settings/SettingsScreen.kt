@@ -3,6 +3,15 @@ package io.github.behnamrm.watertracker.ui.settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.outlined.Edit
+import androidx.compose.material3.Surface
+import io.github.behnamrm.watertracker.ui.components.Overline
+import io.github.behnamrm.watertracker.ui.components.SoftCard
+import io.github.behnamrm.watertracker.ui.theme.MonoStyle
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -14,24 +23,19 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.DeleteOutline
 import androidx.compose.material.icons.rounded.Download
-import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material.icons.rounded.Star
 import androidx.compose.material.icons.rounded.StarOutline
 import androidx.compose.material.icons.rounded.Upload
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilterChip
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -92,82 +96,80 @@ fun SettingsScreen(
     }
 
     LazyColumn(
-        contentPadding = PaddingValues(vertical = 16.dp),
+        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 24.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
         modifier = Modifier.fillMaxSize(),
     ) {
+        item { Text(stringResource(R.string.settings_title), style = MaterialTheme.typography.headlineMedium) }
+
         item {
-            Text(
-                stringResource(R.string.settings_title),
-                style = MaterialTheme.typography.headlineMedium,
-                modifier = Modifier.padding(horizontal = 16.dp),
-            )
+            SoftCard(Modifier.fillMaxWidth(), contentPadding = PaddingValues(vertical = 16.dp)) {
+                Overline(stringResource(R.string.settings_general), Modifier.padding(horizontal = 16.dp))
+                SettingRow(
+                    title = stringResource(R.string.settings_daily_goal),
+                    value = formatVolume(state.settings.dailyGoalMl),
+                    onClick = { dialog = SettingsDialog.Goal },
+                )
+                SettingRow(
+                    title = stringResource(R.string.settings_glass_size),
+                    subtitle = stringResource(
+                        R.string.settings_glass_size_desc,
+                        formatVolume(state.settings.glassSizeMl),
+                        formatVolume(state.settings.halfGlassMl),
+                    ),
+                    value = formatVolume(state.settings.glassSizeMl),
+                    onClick = { dialog = SettingsDialog.Glass },
+                )
+            }
         }
 
-        item { SectionHeader(stringResource(R.string.settings_general)) }
         item {
-            ListItem(
-                headlineContent = { Text(stringResource(R.string.settings_daily_goal)) },
-                trailingContent = { Text(formatVolume(state.settings.dailyGoalMl), style = MaterialTheme.typography.titleSmall) },
-                modifier = Modifier.clickable { dialog = SettingsDialog.Goal },
-            )
-        }
-        item {
-            ListItem(
-                headlineContent = { Text(stringResource(R.string.settings_glass_size)) },
-                supportingContent = {
-                    Text(
-                        stringResource(
-                            R.string.settings_glass_size_desc,
-                            formatVolume(state.settings.glassSizeMl),
-                            formatVolume(state.settings.halfGlassMl),
-                        ),
-                    )
-                },
-                trailingContent = { Text(formatVolume(state.settings.glassSizeMl), style = MaterialTheme.typography.titleSmall) },
-                modifier = Modifier.clickable { dialog = SettingsDialog.Glass },
-            )
-        }
-
-        item { SectionHeader(stringResource(R.string.settings_drink_types)) }
-        item {
-            Text(
-                stringResource(R.string.settings_drink_types_desc, HomeUiState.MAX_FAVORITES),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(horizontal = 16.dp),
-            )
-        }
-        items(state.types, key = { it.id }) { type ->
-            ListItem(
-                leadingContent = { Text(type.emoji, style = MaterialTheme.typography.titleLarge) },
-                headlineContent = { Text(type.name) },
-                trailingContent = {
-                    Row {
+            SoftCard(Modifier.fillMaxWidth(), contentPadding = PaddingValues(vertical = 16.dp)) {
+                Overline(stringResource(R.string.settings_drink_types), Modifier.padding(horizontal = 16.dp))
+                Text(
+                    stringResource(R.string.settings_drink_types_desc, HomeUiState.MAX_FAVORITES),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 4.dp),
+                )
+                state.types.forEach { type ->
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.padding(start = 16.dp, end = 4.dp),
+                    ) {
+                        Surface(shape = CircleShape, color = MaterialTheme.colorScheme.surfaceContainer, modifier = Modifier.size(40.dp)) {
+                            Box(contentAlignment = Alignment.Center) { Text(type.emoji, style = MaterialTheme.typography.titleMedium) }
+                        }
+                        Text(
+                            type.name,
+                            style = MaterialTheme.typography.bodyLarge,
+                            modifier = Modifier.weight(1f).padding(start = 12.dp),
+                        )
                         IconButton(onClick = { viewModel.toggleFavorite(type) }) {
                             Icon(
                                 if (type.favorite) Icons.Rounded.Star else Icons.Rounded.StarOutline,
                                 contentDescription = stringResource(R.string.settings_favorite),
-                                tint = if (type.favorite) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                                tint = if (type.favorite) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.onSurfaceVariant,
                             )
                         }
                         IconButton(onClick = { dialog = SettingsDialog.EditType(type) }) {
-                            Icon(Icons.Rounded.Edit, contentDescription = stringResource(R.string.edit))
+                            Icon(Icons.Outlined.Edit, contentDescription = stringResource(R.string.edit), tint = MaterialTheme.colorScheme.onSurfaceVariant)
                         }
                         IconButton(onClick = { dialog = SettingsDialog.RemoveType(type) }) {
-                            Icon(Icons.Rounded.DeleteOutline, contentDescription = stringResource(R.string.remove))
+                            Icon(Icons.Rounded.DeleteOutline, contentDescription = stringResource(R.string.remove), tint = MaterialTheme.colorScheme.onSurfaceVariant)
                         }
                     }
-                },
-            )
-        }
-        item {
-            TextButton(onClick = { dialog = SettingsDialog.AddType }, modifier = Modifier.padding(horizontal = 8.dp)) {
-                Icon(Icons.Rounded.Add, contentDescription = null)
-                Text(stringResource(R.string.settings_add_drink_type), modifier = Modifier.padding(start = 8.dp))
+                }
+                OutlinedButton(
+                    onClick = { dialog = SettingsDialog.AddType },
+                    modifier = Modifier.padding(start = 16.dp, top = 8.dp),
+                ) {
+                    Icon(Icons.Rounded.Add, contentDescription = null, modifier = Modifier.size(18.dp))
+                    Text(stringResource(R.string.settings_add_drink_type), modifier = Modifier.padding(start = 8.dp))
+                }
             }
         }
 
-        item { SectionHeader(stringResource(R.string.backup_title)) }
         item {
             BackupCard(
                 state = state,
@@ -230,15 +232,23 @@ fun SettingsScreen(
 }
 
 @Composable
-private fun SectionHeader(text: String) {
-    Column(Modifier.padding(top = 24.dp)) {
-        HorizontalDivider()
-        Text(
-            text,
-            style = MaterialTheme.typography.titleSmall,
-            color = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 4.dp),
-        )
+private fun SettingRow(title: String, value: String, onClick: () -> Unit, subtitle: String? = null) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+            .padding(horizontal = 16.dp, vertical = 12.dp),
+    ) {
+        Column(Modifier.weight(1f)) {
+            Text(title, style = MaterialTheme.typography.bodyLarge)
+            if (subtitle != null) {
+                Text(subtitle, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+        }
+        Surface(shape = CircleShape, color = MaterialTheme.colorScheme.surfaceContainer) {
+            Text(value, style = MonoStyle, modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp))
+        }
     }
 }
 
@@ -248,36 +258,39 @@ private fun BackupCard(
     onExport: () -> Unit,
     onImport: () -> Unit,
 ) {
-    Card(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)) {
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            Text(stringResource(R.string.backup_desc), style = MaterialTheme.typography.bodyMedium)
-            val last = state.settings.lastExportAt
-            Text(
-                if (last == null) {
-                    stringResource(R.string.backup_never)
-                } else {
-                    stringResource(
-                        R.string.backup_last_export,
-                        Instant.ofEpochMilli(last).atZone(ZoneId.systemDefault())
-                            .format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM, FormatStyle.SHORT)),
-                    )
-                },
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
-                Button(onClick = onExport, enabled = !state.backupBusy, modifier = Modifier.weight(1f)) {
-                    Icon(Icons.Rounded.Upload, contentDescription = null)
-                    Text(stringResource(R.string.backup_export), modifier = Modifier.padding(start = 8.dp))
-                }
-                OutlinedButton(onClick = onImport, enabled = !state.backupBusy, modifier = Modifier.weight(1f)) {
-                    Icon(Icons.Rounded.Download, contentDescription = null)
-                    Text(stringResource(R.string.backup_import), modifier = Modifier.padding(start = 8.dp))
-                }
+    SoftCard(Modifier.fillMaxWidth()) {
+        Overline(stringResource(R.string.backup_title))
+        Spacer(Modifier.height(8.dp))
+        Text(stringResource(R.string.backup_desc), style = MaterialTheme.typography.bodyMedium)
+        Spacer(Modifier.height(8.dp))
+        val last = state.settings.lastExportAt
+        Text(
+            if (last == null) {
+                stringResource(R.string.backup_never)
+            } else {
+                stringResource(
+                    R.string.backup_last_export,
+                    Instant.ofEpochMilli(last).atZone(ZoneId.systemDefault())
+                        .format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM, FormatStyle.SHORT)),
+                )
+            },
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Spacer(Modifier.height(16.dp))
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+            Button(onClick = onExport, enabled = !state.backupBusy, modifier = Modifier.weight(1f).height(48.dp)) {
+                Icon(Icons.Rounded.Upload, contentDescription = null, modifier = Modifier.size(18.dp))
+                Text(stringResource(R.string.backup_export), modifier = Modifier.padding(start = 8.dp))
             }
-            if (state.backupBusy) {
-                CircularProgressIndicator(Modifier.size(20.dp).align(Alignment.CenterHorizontally), strokeWidth = 2.dp)
+            OutlinedButton(onClick = onImport, enabled = !state.backupBusy, modifier = Modifier.weight(1f).height(48.dp)) {
+                Icon(Icons.Rounded.Download, contentDescription = null, modifier = Modifier.size(18.dp))
+                Text(stringResource(R.string.backup_import), modifier = Modifier.padding(start = 8.dp))
             }
+        }
+        if (state.backupBusy) {
+            Spacer(Modifier.height(12.dp))
+            CircularProgressIndicator(Modifier.size(20.dp).align(Alignment.CenterHorizontally), strokeWidth = 2.dp)
         }
     }
 }

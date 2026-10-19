@@ -8,22 +8,31 @@
 
     <!-- Home -->
     <string name="home_title">Today</string>
-    <string name="home_goal_of">of %1$s goal</string>
-    <string name="home_goal_reached">Goal reached! 🎉</string>
-    <string name="home_percent">%1$d%%</string>
+    <string name="home_today_caption">Today</string>
+    <string name="home_week_avg">This week</string>
+    <string name="home_goal_caption">Goal</string>
+    <string name="home_by_drink">By drink</string>
     <string name="add_drink">Add a drink</string>
-    <string name="drink_type">Drink type</string>
+    <string name="drink_type">Type</string>
+    <string name="capacity">Capacity</string>
+    <string name="capacity_custom">Custom…</string>
     <string name="preset_third_glass">⅓ glass</string>
-    <string name="preset_half_glass">½ glass</string>
-    <string name="preset_full_glass">Full glass</string>
+    <string name="preset_half_glass">Half glass</string>
+    <string name="preset_full_glass">Full</string>
+    <string name="date_now">Now</string>
+    <string name="date_use_now">Use now</string>
+    <string name="next">Next</string>
+    <string name="ok">OK</string>
+    <string name="pick_time">Time</string>
+    <string name="add_amount">Add %1$s</string>
     <string name="today_drinks">Today\'s drinks</string>
     <string name="today_empty">Nothing yet today. Tap a button above to log a drink.</string>
     <string name="added_message">Added %1$s of %2$s</string>
+    <string name="added_message_on">Added %1$s of %2$s on %3$s</string>
     <string name="deleted_message">Removed %1$s of %2$s</string>
     <string name="undo">Undo</string>
     <string name="delete">Delete</string>
     <string name="no_drink_types">Add a drink type in Settings to start logging.</string>
-    <string name="time_saved_automatically">Date and time are saved automatically.</string>
 
     <string name="amount_ml">Amount (ml)</string>
     <string name="add">Add</string>
@@ -38,10 +47,12 @@
     <string name="stats_previous">Previous period</string>
     <string name="stats_next">Next period</string>
     <string name="stats_total">Total</string>
-    <string name="stats_daily_average">Daily average</string>
+    <string name="stats_daily_average">Avg / day</string>
     <string name="stats_best_day">Best day</string>
     <string name="stats_best_week">Best week</string>
-    <string name="stats_goal_days">Goal reached on %1$d of %2$d days</string>
+    <string name="stats_goal_days_caption">days the goal was reached</string>
+    <string name="stats_per_day">Per day</string>
+    <string name="stats_per_week">Per week</string>
     <string name="stats_by_type">By drink type</string>
     <string name="stats_no_data">No drinks logged in this period.</string>
     <string name="stats_goal_line">Dashed line: daily goal</string>

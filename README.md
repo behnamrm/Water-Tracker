@@ -6,18 +6,21 @@ A simple Android app for keeping track of how much you drink each day.
   <img src="docs/today.png" width="250" alt="Today">
   <img src="docs/statistics.png" width="250" alt="Statistics">
   <img src="docs/settings.png" width="250" alt="Settings">
+  <img src="docs/today-dark.png" width="250" alt="Today in dark mode">
 </p>
 
 ## Features
 
-- **Today** – a ring that shows what you drank today. Below 1000 ml it's shown in millilitres
-  (`750 ml`); from 1000 ml on it switches to litres with decimals (`1.25 L`).
-- **Add a drink**
-  - a dropdown with every drink type, plus one-tap buttons beside it for your favorites
-    (by default Water, Soft drinks and Tea)
-  - a box for the amount in ml, or tap a preset: **⅓ glass**, **½ glass** or **full glass**
-  - date and time are saved automatically; each entry can be deleted, and a snackbar lets you undo
-- **Drink types** – Water, Soft drinks, Non-alcoholic, Alcoholic, Tea and Other to start with.
+- **Today** – this week as a row of days (dark blue = goal reached, light blue = today), today's
+  total in large type with the week as thin bars, a goal gauge and today's amount per drink.
+  Below 1000 ml amounts are shown in millilitres (`750 ml`); from 1000 ml on in litres with
+  decimals (`1.25 L`).
+- **Add a drink** – three rows of tiles:
+  - **Type ▾** (every drink type) and one-tap **Water**, **Soft drinks**, **Milk**
+  - **Capacity ▾** (100 ml … 1 L or a custom amount) and **⅓ glass**, **Half glass**, **Full**
+  - **Date** (defaults to *Now*; pick another day and time to log something you forgot) and **Add**
+  - each entry can be deleted, and a snackbar lets you undo
+- **Drink types** – Water, Soft drinks, Non-alcoholic, Alcoholic, Tea, Milk and Other to start with.
   In Settings you can rename them, change their icon, add new ones, remove them, and star the
   (up to 3) favorites that get a quick button.
 - **Statistics** – daily (7 days per page) and weekly (8 weeks per page) bar charts with your
@@ -52,6 +55,11 @@ keystore: run `base64 -w0 ~/.android/debug.keystore` (macOS: `base64 -i ~/.andro
 and save the output as a repository secret named `DEBUG_KEYSTORE_BASE64`
 (**Settings → Secrets and variables → Actions**). Otherwise, **Export** a backup, uninstall, install
 the new APK and **Import** the backup.
+
+## Credits
+
+The app uses the [DM Sans](https://github.com/googlefonts/dm-fonts) font, licensed under the
+SIL Open Font License (see `FONT_LICENSE_OFL.txt`).
 
 ## Project layout
 

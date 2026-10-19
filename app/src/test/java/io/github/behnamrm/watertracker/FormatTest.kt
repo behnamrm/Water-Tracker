@@ -1,6 +1,8 @@
 package io.github.behnamrm.watertracker
 
+import io.github.behnamrm.watertracker.util.formatNumber
 import io.github.behnamrm.watertracker.util.formatVolume
+import io.github.behnamrm.watertracker.util.formatVolumeParts
 import io.github.behnamrm.watertracker.util.formatVolumeShort
 import org.junit.Assert.assertEquals
 import org.junit.Test
@@ -32,5 +34,12 @@ class FormatTest {
         assertEquals("750", formatVolumeShort(750, Locale.US))
         assertEquals("1.3L", formatVolumeShort(1250, Locale.US))
         assertEquals("2L", formatVolumeShort(2000, Locale.US))
+    }
+
+    @Test
+    fun partsForLargeDisplay() {
+        assertEquals("750" to "ml", formatVolumeParts(750, Locale.US))
+        assertEquals("1.25" to "L", formatVolumeParts(1250, Locale.US))
+        assertEquals("2,000", formatNumber(2000, Locale.US))
     }
 }

@@ -11,7 +11,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.unit.Dp
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -23,19 +25,23 @@ import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.layout.width
+import androidx.compose.ui.unit.sp
+import io.github.behnamrm.watertracker.ui.theme.MonoStyle
 import io.github.behnamrm.watertracker.util.formatVolumeShort
 
 data class ChartBar(val label: String, val sublabel: String, val valueMl: Int, val highlighted: Boolean)
 
 private val ValueLabelHeight = 18.dp
 private val BarAreaHeight = 170.dp
+private val BarWidth: Dp = 14.dp
 
-/** A simple vertical bar chart with an optional dashed goal line. */
+/** A bar chart of rounded capsules on light tracks, with an optional dashed goal line. */
 @Composable
 fun BarChart(bars: List<ChartBar>, goalMl: Int?, modifier: Modifier = Modifier) {
     val maxValue = maxOf(bars.maxOfOrNull { it.valueMl } ?: 0, goalMl ?: 0, 1)
     val colors = MaterialTheme.colorScheme
-    val goalColor = colors.tertiary
+    val goalColor = colors.secondary
 
     Column(modifier.fillMaxWidth()) {
         Box(Modifier.fillMaxWidth().height(BarAreaHeight + ValueLabelHeight)) {
@@ -50,21 +56,31 @@ fun BarChart(bars: List<ChartBar>, goalMl: Int?, modifier: Modifier = Modifier) 
                     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.weight(1f)) {
                         Text(
                             if (bar.valueMl > 0) formatVolumeShort(bar.valueMl) else "",
-                            style = MaterialTheme.typography.labelSmall,
+                            style = MonoStyle.copy(fontSize = 10.sp),
+                            color = colors.onSurfaceVariant,
                             maxLines = 1,
                             softWrap = false,
                             overflow = TextOverflow.Visible,
                             modifier = Modifier.height(ValueLabelHeight),
                         )
                         Box(
-                            Modifier
-                                .fillMaxWidth()
-                                .height(height)
-                                .background(
-                                    if (bar.highlighted) colors.primary else colors.primary.copy(alpha = 0.5f),
-                                    RoundedCornerShape(topStart = 6.dp, topEnd = 6.dp),
-                                ),
-                        )
+                            contentAlignment = Alignment.BottomCenter,
+                            modifier = Modifier
+                                .width(BarWidth)
+                                .height(BarAreaHeight)
+                                .clip(CircleShape)
+                                .background(colors.surfaceContainerHigh),
+                        ) {
+                            if (bar.valueMl > 0) {
+                                Box(
+                                    Modifier
+                                        .fillMaxWidth()
+                                        .height(maxOf(height, BarWidth))
+                                        .clip(CircleShape)
+                                        .background(if (bar.highlighted) colors.secondary else colors.primary),
+                                )
+                            }
+                        }
                     }
                 }
             }
@@ -87,7 +103,7 @@ fun BarChart(bars: List<ChartBar>, goalMl: Int?, modifier: Modifier = Modifier) 
                     Text(
                         bar.label,
                         style = MaterialTheme.typography.labelMedium,
-                        color = if (bar.highlighted) colors.primary else colors.onSurface,
+                        color = if (bar.highlighted) colors.secondary else colors.onSurface,
                         maxLines = 1,
                         textAlign = TextAlign.Center,
                     )
