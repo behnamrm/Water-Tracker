@@ -7,7 +7,9 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.outlined.Description
 import androidx.compose.material.icons.outlined.Edit
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Surface
 import io.github.behnamrm.watertracker.ui.components.Overline
 import io.github.behnamrm.watertracker.ui.components.SoftCard
@@ -90,6 +92,9 @@ fun SettingsScreen(
     }
     val importLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
         uri?.let(viewModel::importFrom)
+    }
+    val csvLauncher = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("text/csv")) { uri ->
+        uri?.let(viewModel::exportCsvTo)
     }
     LaunchedEffect(viewModel) {
         viewModel.messages.collect { snackbarHostState.showSnackbar(it) }
@@ -175,6 +180,7 @@ fun SettingsScreen(
                 state = state,
                 onExport = { exportLauncher.launch(viewModel.exportFileName()) },
                 onImport = { dialog = SettingsDialog.ConfirmImport },
+                onExportCsv = { csvLauncher.launch(viewModel.csvFileName()) },
             )
         }
     }
@@ -257,6 +263,7 @@ private fun BackupCard(
     state: SettingsUiState,
     onExport: () -> Unit,
     onImport: () -> Unit,
+    onExportCsv: () -> Unit,
 ) {
     SoftCard(Modifier.fillMaxWidth()) {
         Overline(stringResource(R.string.backup_title))
@@ -287,6 +294,17 @@ private fun BackupCard(
                 Icon(Icons.Rounded.Download, contentDescription = null, modifier = Modifier.size(18.dp))
                 Text(stringResource(R.string.backup_import), modifier = Modifier.padding(start = 8.dp))
             }
+        }
+        Spacer(Modifier.height(16.dp))
+        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+        Spacer(Modifier.height(16.dp))
+        Overline(stringResource(R.string.csv_title))
+        Spacer(Modifier.height(8.dp))
+        Text(stringResource(R.string.csv_desc), style = MaterialTheme.typography.bodyMedium)
+        Spacer(Modifier.height(12.dp))
+        OutlinedButton(onClick = onExportCsv, enabled = !state.backupBusy, modifier = Modifier.fillMaxWidth().height(48.dp)) {
+            Icon(Icons.Outlined.Description, contentDescription = null, modifier = Modifier.size(18.dp))
+            Text(stringResource(R.string.csv_export), modifier = Modifier.padding(start = 8.dp))
         }
         if (state.backupBusy) {
             Spacer(Modifier.height(12.dp))

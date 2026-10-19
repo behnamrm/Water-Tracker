@@ -18,7 +18,8 @@ A simple Android app for keeping track of how much you drink each day.
 - **Add a drink** – three rows of tiles:
   - **Type ▾** (every drink type) and one-tap **Water**, **Soft drinks**, **Milk**
   - **Capacity ▾** (100 ml … 1 L or a custom amount) and **⅓ glass**, **Half glass**, **Full**
-  - **Date** (defaults to *Now*; pick another day and time to log something you forgot) and **Add**
+  - **Date & time** (defaults to *Now*; one dialog picks both the day and the time, to log
+    something you forgot) and **Add**
   - each entry can be deleted, and a snackbar lets you undo
 - **Drink types** – Water, Soft drinks, Non-alcoholic, Alcoholic, Tea, Milk and Other to start with.
   In Settings you can rename them, change their icon, add new ones, remove them, and star the
@@ -31,7 +32,10 @@ A simple Android app for keeping track of how much you drink each day.
 - **Storage & backup** – everything is stored on the phone (Room/SQLite). **Settings → Backup →
   Export** saves all your drinks, drink types and settings to a `WaterTracker-backup-<date>.json`
   file wherever you choose (Downloads, SD card, a cloud app…); **Import** restores from such a file,
-  replacing what's on the phone. The app needs no permissions and no internet access.
+  replacing what's on the phone. **Export as text (CSV)** saves every drink as a
+  `WaterTracker-data-<date>.csv` file with the columns `date,time,drink_type,amount_ml`
+  (e.g. `2026-10-19,08:30,Water,250`) for making your own charts in Excel, Google Sheets,
+  Python, etc. The app needs no permissions and no internet access.
 
 ## Building
 

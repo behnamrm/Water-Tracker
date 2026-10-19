@@ -20,24 +20,15 @@ import androidx.compose.material.icons.rounded.ArrowDropDown
 import androidx.compose.material.icons.rounded.CalendarMonth
 import androidx.compose.material.icons.rounded.LocalDrink
 import androidx.compose.material.icons.rounded.Straighten
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.DatePicker
-import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SelectableDates
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.TimePicker
-import androidx.compose.material3.rememberDatePickerState
-import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -63,14 +54,13 @@ import androidx.compose.ui.unit.dp
 import io.github.behnamrm.watertracker.R
 import io.github.behnamrm.watertracker.data.DrinkType
 import io.github.behnamrm.watertracker.ui.components.AmountDialog
+import io.github.behnamrm.watertracker.ui.components.DateTimePickerDialog
 import io.github.behnamrm.watertracker.ui.components.Overline
 import io.github.behnamrm.watertracker.ui.components.SoftCard
 import io.github.behnamrm.watertracker.util.formatVolume
 import java.time.Instant
-import java.time.LocalDate
-import java.time.LocalTime
+import java.time.LocalDateTime
 import java.time.ZoneId
-import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 
@@ -260,15 +250,13 @@ private fun CapacityRow(glassMl: Int, amountMl: Int, onAmountChange: (Int) -> Un
     }
 }
 
-/** Date tile: "Now" by default; tapping it picks a date and then a time (not in the future). */
-@OptIn(ExperimentalMaterial3Api::class)
+/** Date & time tile: "Now" by default; tapping it opens one dialog to pick both (not in the future). */
 @Composable
 private fun DateTile(timestamp: Long?, onChange: (Long?) -> Unit, modifier: Modifier) {
     val zone = ZoneId.systemDefault()
-    var pickingDate by rememberSaveable { mutableStateOf(false) }
-    var pickedDate by rememberSaveable { mutableStateOf<String?>(null) } // ISO date while picking the time
+    var picking by rememberSaveable { mutableStateOf(false) }
 
-    Tile(selected = timestamp != null, onClick = { pickingDate = true }, modifier = modifier, height = BottomRowHeight, shape = CircleShape) {
+    Tile(selected = timestamp != null, onClick = { picking = true }, modifier = modifier, height = BottomRowHeight, shape = CircleShape) {
         if (timestamp == null) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(Icons.Rounded.CalendarMonth, contentDescription = null, modifier = Modifier.size(18.dp))
@@ -286,57 +274,17 @@ private fun DateTile(timestamp: Long?, onChange: (Long?) -> Unit, modifier: Modi
         }
     }
 
-    if (pickingDate) {
-        val todayUtcMillis = LocalDate.now().atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli()
-        val dateState = rememberDatePickerState(
-            initialSelectedDateMillis = timestamp
-                ?.let { Instant.ofEpochMilli(it).atZone(zone).toLocalDate().atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli() }
-                ?: todayUtcMillis,
-            selectableDates = object : SelectableDates {
-                override fun isSelectableDate(utcTimeMillis: Long) = utcTimeMillis <= todayUtcMillis
-                override fun isSelectableYear(year: Int) = year <= LocalDate.now().year
+    if (picking) {
+        DateTimePickerDialog(
+            initial = timestamp?.let { Instant.ofEpochMilli(it).atZone(zone).toLocalDateTime() } ?: LocalDateTime.now(),
+            onDismiss = { picking = false },
+            onUseNow = {
+                onChange(null)
+                picking = false
             },
-        )
-        DatePickerDialog(
-            onDismissRequest = { pickingDate = false },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        pickedDate = dateState.selectedDateMillis
-                            ?.let { Instant.ofEpochMilli(it).atZone(ZoneOffset.UTC).toLocalDate().toString() }
-                        pickingDate = false
-                    },
-                    enabled = dateState.selectedDateMillis != null,
-                ) { Text(stringResource(R.string.next)) }
-            },
-            dismissButton = {
-                TextButton(onClick = {
-                    onChange(null)
-                    pickingDate = false
-                }) { Text(stringResource(R.string.date_use_now)) }
-            },
-        ) {
-            DatePicker(dateState)
-        }
-    }
-
-    pickedDate?.let { iso ->
-        val initial = timestamp?.let { Instant.ofEpochMilli(it).atZone(zone).toLocalTime() } ?: LocalTime.now()
-        val timeState = rememberTimePickerState(initialHour = initial.hour, initialMinute = initial.minute)
-        AlertDialog(
-            onDismissRequest = { pickedDate = null },
-            title = { Text(stringResource(R.string.pick_time)) },
-            text = { TimePicker(timeState) },
-            confirmButton = {
-                TextButton(onClick = {
-                    val millis = LocalDate.parse(iso).atTime(timeState.hour, timeState.minute)
-                        .atZone(zone).toInstant().toEpochMilli()
-                    onChange(minOf(millis, System.currentTimeMillis()))
-                    pickedDate = null
-                }) { Text(stringResource(R.string.ok)) }
-            },
-            dismissButton = {
-                TextButton(onClick = { pickedDate = null }) { Text(stringResource(R.string.cancel)) }
+            onConfirm = { picked ->
+                onChange(picked.atZone(zone).toInstant().toEpochMilli())
+                picking = false
             },
         )
     }

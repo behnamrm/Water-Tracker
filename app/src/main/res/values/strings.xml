@@ -21,9 +21,9 @@
     <string name="preset_full_glass">Full</string>
     <string name="date_now">Now</string>
     <string name="date_use_now">Use now</string>
-    <string name="next">Next</string>
     <string name="ok">OK</string>
-    <string name="pick_time">Time</string>
+    <string name="done">Done</string>
+    <string name="time_in_future">This time is in the future. Pick an earlier time.</string>
     <string name="add_amount">Add %1$s</string>
     <string name="today_drinks">Today\'s drinks</string>
     <string name="today_empty">Nothing yet today. Tap a button above to log a drink.</string>
@@ -85,6 +85,10 @@
     <string name="backup_export_done">Backup exported</string>
     <string name="backup_import_done">Backup imported</string>
     <string name="backup_error">Something went wrong: %1$s</string>
+    <string name="csv_title">Data for charts</string>
+    <string name="csv_desc">Export every drink as a text file (CSV: date, time, drink type, amount in ml). It opens in Excel, Google Sheets or any tool you use for charts.</string>
+    <string name="csv_export">Export as text (CSV)</string>
+    <string name="csv_export_done">Data exported</string>
     <string name="backup_import_confirm_title">Import backup?</string>
     <string name="backup_import_confirm_message">This replaces all drinks, drink types and settings on this phone with the ones in the backup file you pick next.</string>
 </resources>

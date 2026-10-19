@@ -77,6 +77,18 @@ class SettingsViewModel(
         settings.setLastExportAt(System.currentTimeMillis())
     }
 
+    /** Suggested name for a CSV data export. */
+    fun csvFileName() = "WaterTracker-data-${LocalDate.now()}.csv"
+
+    /** Writes all drinks as a CSV text file the user picked. */
+    fun exportCsvTo(uri: Uri) = runBackupTask(R.string.csv_export_done) {
+        val csv = repository.exportCsv()
+        withContext(Dispatchers.IO) {
+            val stream = app.contentResolver.openOutputStream(uri, "wt") ?: throw FileNotFoundException(uri.toString())
+            stream.bufferedWriter().use { it.write(csv) }
+        }
+    }
+
     /** Replaces all data with the backup in a file the user picked. */
     fun importFrom(uri: Uri) = runBackupTask(R.string.backup_import_done) {
         val json = withContext(Dispatchers.IO) {

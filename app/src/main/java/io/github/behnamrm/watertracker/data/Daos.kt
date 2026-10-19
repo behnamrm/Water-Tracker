@@ -30,6 +30,15 @@ interface IntakeDao {
     @Query("SELECT * FROM intakes ORDER BY timestamp")
     suspend fun getAll(): List<Intake>
 
+    @Query(
+        """
+        SELECT i.id, i.drinkTypeId, i.amountMl, i.timestamp, t.name AS typeName, t.emoji AS typeEmoji
+        FROM intakes i JOIN drink_types t ON t.id = i.drinkTypeId
+        ORDER BY i.timestamp
+        """,
+    )
+    suspend fun getAllWithType(): List<IntakeWithType>
+
     @Query("DELETE FROM intakes")
     suspend fun deleteAll()
 }
