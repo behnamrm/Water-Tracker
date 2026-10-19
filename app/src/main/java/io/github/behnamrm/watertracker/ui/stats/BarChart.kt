@@ -1,0 +1,105 @@
+package io.github.behnamrm.watertracker.ui.stats
+
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
+import io.github.behnamrm.watertracker.util.formatVolumeShort
+
+data class ChartBar(val label: String, val sublabel: String, val valueMl: Int, val highlighted: Boolean)
+
+private val ValueLabelHeight = 18.dp
+private val BarAreaHeight = 170.dp
+
+/** A simple vertical bar chart with an optional dashed goal line. */
+@Composable
+fun BarChart(bars: List<ChartBar>, goalMl: Int?, modifier: Modifier = Modifier) {
+    val maxValue = maxOf(bars.maxOfOrNull { it.valueMl } ?: 0, goalMl ?: 0, 1)
+    val colors = MaterialTheme.colorScheme
+    val goalColor = colors.tertiary
+
+    Column(modifier.fillMaxWidth()) {
+        Box(Modifier.fillMaxWidth().height(BarAreaHeight + ValueLabelHeight)) {
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                verticalAlignment = Alignment.Bottom,
+                modifier = Modifier.fillMaxSize(),
+            ) {
+                bars.forEach { bar ->
+                    val target = BarAreaHeight * (bar.valueMl.toFloat() / maxValue)
+                    val height by animateDpAsState(target, label = "bar")
+                    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.weight(1f)) {
+                        Text(
+                            if (bar.valueMl > 0) formatVolumeShort(bar.valueMl) else "",
+                            style = MaterialTheme.typography.labelSmall,
+                            maxLines = 1,
+                            softWrap = false,
+                            overflow = TextOverflow.Visible,
+                            modifier = Modifier.height(ValueLabelHeight),
+                        )
+                        Box(
+                            Modifier
+                                .fillMaxWidth()
+                                .height(height)
+                                .background(
+                                    if (bar.highlighted) colors.primary else colors.primary.copy(alpha = 0.5f),
+                                    RoundedCornerShape(topStart = 6.dp, topEnd = 6.dp),
+                                ),
+                        )
+                    }
+                }
+            }
+            if (goalMl != null && goalMl > 0) {
+                Canvas(Modifier.fillMaxSize()) {
+                    val y = size.height - BarAreaHeight.toPx() * (goalMl.toFloat() / maxValue)
+                    drawLine(
+                        color = goalColor,
+                        start = Offset(0f, y),
+                        end = Offset(size.width, y),
+                        strokeWidth = 2.dp.toPx(),
+                        pathEffect = PathEffect.dashPathEffect(floatArrayOf(12f, 10f)),
+                    )
+                }
+            }
+        }
+        Row(horizontalArrangement = Arrangement.spacedBy(6.dp), modifier = Modifier.padding(top = 6.dp)) {
+            bars.forEach { bar ->
+                Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.weight(1f)) {
+                    Text(
+                        bar.label,
+                        style = MaterialTheme.typography.labelMedium,
+                        color = if (bar.highlighted) colors.primary else colors.onSurface,
+                        maxLines = 1,
+                        textAlign = TextAlign.Center,
+                    )
+                    Text(
+                        bar.sublabel,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = colors.onSurfaceVariant,
+                        maxLines = 1,
+                        textAlign = TextAlign.Center,
+                    )
+                }
+            }
+        }
+    }
+}

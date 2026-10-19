@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Water Tracker</string>
+
+    <string name="tab_today">Today</string>
+    <string name="tab_stats">Statistics</string>
+    <string name="tab_settings">Settings</string>
+
+    <!-- Home -->
+    <string name="home_title">Today</string>
+    <string name="home_goal_of">of %1$s goal</string>
+    <string name="home_goal_reached">Goal reached! 🎉</string>
+    <string name="home_percent">%1$d%%</string>
+    <string name="add_drink">Add a drink</string>
+    <string name="drink_type">Drink type</string>
+    <string name="preset_third_glass">⅓ glass</string>
+    <string name="preset_half_glass">½ glass</string>
+    <string name="preset_full_glass">Full glass</string>
+    <string name="today_drinks">Today\'s drinks</string>
+    <string name="today_empty">Nothing yet today. Tap a button above to log a drink.</string>
+    <string name="added_message">Added %1$s of %2$s</string>
+    <string name="deleted_message">Removed %1$s of %2$s</string>
+    <string name="undo">Undo</string>
+    <string name="delete">Delete</string>
+    <string name="no_drink_types">Add a drink type in Settings to start logging.</string>
+    <string name="time_saved_automatically">Date and time are saved automatically.</string>
+
+    <string name="amount_ml">Amount (ml)</string>
+    <string name="add">Add</string>
+    <string name="cancel">Cancel</string>
+    <string name="save">Save</string>
+    <string name="amount_invalid">Enter a value between %1$d and %2$d ml</string>
+
+    <!-- Stats -->
+    <string name="stats_title">Statistics</string>
+    <string name="stats_daily">Daily</string>
+    <string name="stats_weekly">Weekly</string>
+    <string name="stats_previous">Previous period</string>
+    <string name="stats_next">Next period</string>
+    <string name="stats_total">Total</string>
+    <string name="stats_daily_average">Daily average</string>
+    <string name="stats_best_day">Best day</string>
+    <string name="stats_best_week">Best week</string>
+    <string name="stats_goal_days">Goal reached on %1$d of %2$d days</string>
+    <string name="stats_by_type">By drink type</string>
+    <string name="stats_no_data">No drinks logged in this period.</string>
+    <string name="stats_goal_line">Dashed line: daily goal</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Settings</string>
+    <string name="settings_general">General</string>
+    <string name="settings_daily_goal">Daily goal</string>
+    <string name="settings_glass_size">Glass size</string>
+    <string name="settings_glass_size_desc">Full glass: %1$s · Half glass: %2$s</string>
+    <string name="settings_drink_types">Drink types</string>
+    <string name="settings_add_drink_type">Add drink type</string>
+    <string name="settings_edit_drink_type">Edit drink type</string>
+    <string name="settings_type_name">Name</string>
+    <string name="settings_type_icon">Icon (emoji)</string>
+    <string name="settings_remove_type_title">Remove %1$s?</string>
+    <string name="settings_remove_type_message">It will disappear from quick add. Drinks you already logged stay in your history.</string>
+    <string name="settings_drink_types_desc">Starred types (up to %1$d) get a quick button next to the dropdown.</string>
+    <string name="settings_favorite">Quick button</string>
+    <string name="settings_favorites_full">You can star up to %1$d drink types. Un-star one first.</string>
+    <string name="remove">Remove</string>
+    <string name="edit">Edit</string>
+
+    <string name="drive_title">Google Drive backup</string>
+    <string name="drive_desc">Your data is always saved on this phone. Back it up to your Google Drive to keep it safe or move it to a new phone.</string>
+    <string name="drive_backup_now">Back up now</string>
+    <string name="drive_restore">Restore</string>
+    <string name="drive_auto">Automatic daily backup</string>
+    <string name="drive_auto_desc">Backs up once a day when you\'re online</string>
+    <string name="drive_last_backup">Last backup: %1$s</string>
+    <string name="drive_never">Not backed up yet</string>
+    <string name="drive_working">Talking to Google Drive…</string>
+    <string name="drive_backup_done">Backup saved to Google Drive</string>
+    <string name="drive_restore_done">Data restored from Google Drive</string>
+    <string name="drive_no_backup">No backup found on Google Drive</string>
+    <string name="drive_cancelled">Google Drive access was not granted</string>
+    <string name="drive_error">Google Drive error: %1$s</string>
+    <string name="drive_restore_confirm_title">Restore from Google Drive?</string>
+    <string name="drive_restore_confirm_message">This replaces all drinks, drink types and settings on this phone with the latest backup.</string>
+</resources>
