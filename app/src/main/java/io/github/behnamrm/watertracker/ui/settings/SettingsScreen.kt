@@ -67,7 +67,7 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 
-private val EmojiChoices = listOf("💧", "🥤", "🧃", "🍺", "🍷", "🍵", "☕", "🥛", "🧋", "🍹", "🥥", "🫗")
+private val EmojiChoices = listOf("💧", "🥤", "🧃", "🍺", "🍷", "🍵", "☕", "🥛", "🍹", "🥥", "🍶", "🥃")
 
 private sealed interface SettingsDialog {
     data object Goal : SettingsDialog

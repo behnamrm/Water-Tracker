@@ -22,6 +22,7 @@ private val LightColors = lightColorScheme(
     surfaceContainerLow = Color(0xFFF0F4FC),
     surfaceContainer = Color(0xFFEAEFF8),
     surfaceContainerHigh = Color(0xFFE4E9F3),
+    surfaceContainerHighest = Color(0xFFDDE4F2),
 )
 
 private val DarkColors = darkColorScheme(

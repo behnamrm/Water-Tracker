@@ -2,6 +2,12 @@
 
 A simple Android app for keeping track of how much you drink each day.
 
+<p>
+  <img src="docs/today.png" width="250" alt="Today">
+  <img src="docs/statistics.png" width="250" alt="Statistics">
+  <img src="docs/settings.png" width="250" alt="Settings">
+</p>
+
 ## Features
 
 - **Today** – a ring that shows what you drank today. Below 1000 ml it's shown in millilitres

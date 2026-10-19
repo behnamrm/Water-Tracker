@@ -15,7 +15,7 @@ private val DefaultDrinkTypes = listOf(
     DefaultType("🧃", "Non-alcoholic", favorite = false),
     DefaultType("🍺", "Alcoholic", favorite = false),
     DefaultType("🍵", "Tea", favorite = true),
-    DefaultType("🫗", "Other", favorite = false),
+    DefaultType("🍹", "Other", favorite = false),
 )
 
 @Database(entities = [DrinkType::class, Intake::class], version = 1, exportSchema = false)

@@ -159,7 +159,7 @@ private fun TodayProgress(totalMl: Int, goalMl: Int, progress: Float) {
     val bar = MaterialTheme.colorScheme.primary
 
     Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxWidth()) {
-        Box(contentAlignment = Alignment.Center, modifier = Modifier.size(220.dp)) {
+        Box(contentAlignment = Alignment.Center, modifier = Modifier.size(190.dp)) {
             Canvas(Modifier.fillMaxSize()) {
                 val stroke = 18.dp.toPx()
                 val topLeft = Offset(stroke / 2, stroke / 2)
