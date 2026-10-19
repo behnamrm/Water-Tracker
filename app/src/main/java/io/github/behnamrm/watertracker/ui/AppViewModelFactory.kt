@@ -12,10 +12,7 @@ import io.github.behnamrm.watertracker.ui.stats.StatsViewModel
 val AppViewModelFactory: ViewModelProvider.Factory = viewModelFactory {
     initializer { HomeViewModel(app().container.repository, app().container.settings) }
     initializer { StatsViewModel(app().container.repository, app().container.settings) }
-    initializer {
-        val c = app().container
-        SettingsViewModel(app(), c.repository, c.settings, c.driveAuthorizer, c.driveBackup)
-    }
+    initializer { SettingsViewModel(app(), app().container.repository, app().container.settings) }
 }
 
 private fun CreationExtras.app(): WaterApp =

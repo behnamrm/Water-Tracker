@@ -2,7 +2,6 @@ package io.github.behnamrm.watertracker.data
 
 import android.content.Context
 import androidx.datastore.preferences.core.Preferences
-import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
@@ -14,8 +13,7 @@ import kotlinx.coroutines.flow.map
 data class AppSettings(
     val dailyGoalMl: Int = DEFAULT_GOAL_ML,
     val glassSizeMl: Int = DEFAULT_GLASS_ML,
-    val autoBackup: Boolean = false,
-    val lastBackupAt: Long? = null,
+    val lastExportAt: Long? = null,
 ) {
     val halfGlassMl: Int get() = glassSizeMl / 2
 
@@ -31,8 +29,7 @@ class SettingsRepository(private val context: Context) {
     private object Keys {
         val dailyGoal = intPreferencesKey("daily_goal_ml")
         val glassSize = intPreferencesKey("glass_size_ml")
-        val autoBackup = booleanPreferencesKey("auto_backup")
-        val lastBackupAt = longPreferencesKey("last_backup_at")
+        val lastExportAt = longPreferencesKey("last_export_at")
     }
 
     val settings: Flow<AppSettings> = context.dataStore.data.map { it.toSettings() }
@@ -43,9 +40,7 @@ class SettingsRepository(private val context: Context) {
 
     suspend fun setGlassSize(ml: Int) = edit { it[Keys.glassSize] = ml }
 
-    suspend fun setAutoBackup(enabled: Boolean) = edit { it[Keys.autoBackup] = enabled }
-
-    suspend fun setLastBackupAt(millis: Long) = edit { it[Keys.lastBackupAt] = millis }
+    suspend fun setLastExportAt(millis: Long) = edit { it[Keys.lastExportAt] = millis }
 
     private suspend fun edit(block: (androidx.datastore.preferences.core.MutablePreferences) -> Unit) {
         context.dataStore.edit(block)
@@ -54,7 +49,6 @@ class SettingsRepository(private val context: Context) {
     private fun Preferences.toSettings() = AppSettings(
         dailyGoalMl = this[Keys.dailyGoal] ?: AppSettings.DEFAULT_GOAL_ML,
         glassSizeMl = this[Keys.glassSize] ?: AppSettings.DEFAULT_GLASS_ML,
-        autoBackup = this[Keys.autoBackup] ?: false,
-        lastBackupAt = this[Keys.lastBackupAt],
+        lastExportAt = this[Keys.lastExportAt],
     )
 }

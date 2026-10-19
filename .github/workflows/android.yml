@@ -9,8 +9,8 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env:
-      # Optional: base64 of a keystore to sign the debug APK with, so its SHA-1 stays the same
-      # between builds (Google Drive sign-in is tied to that SHA-1). See README.
+      # Optional: base64 of a keystore to sign the debug APK with, so new builds can be installed
+      # over older ones. See README.
       DEBUG_KEYSTORE_BASE64: ${{ secrets.DEBUG_KEYSTORE_BASE64 }}
     steps:
       - uses: actions/checkout@v4

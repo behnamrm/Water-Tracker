@@ -1,8 +1,6 @@
 package io.github.behnamrm.watertracker.ui.settings
 
-import android.app.Activity
 import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -19,12 +17,12 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
-import androidx.compose.material.icons.rounded.CloudDownload
-import androidx.compose.material.icons.rounded.CloudUpload
 import androidx.compose.material.icons.rounded.DeleteOutline
+import androidx.compose.material.icons.rounded.Download
 import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material.icons.rounded.Star
 import androidx.compose.material.icons.rounded.StarOutline
+import androidx.compose.material.icons.rounded.Upload
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -34,12 +32,10 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
-import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -51,7 +47,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -75,7 +70,7 @@ private sealed interface SettingsDialog {
     data object AddType : SettingsDialog
     data class EditType(val type: DrinkType) : SettingsDialog
     data class RemoveType(val type: DrinkType) : SettingsDialog
-    data object ConfirmRestore : SettingsDialog
+    data object ConfirmImport : SettingsDialog
 }
 
 @Composable
@@ -86,17 +81,11 @@ fun SettingsScreen(
     val state by viewModel.state.collectAsStateWithLifecycle()
     var dialog by remember { mutableStateOf<SettingsDialog?>(null) }
 
-    val authLauncher = rememberLauncherForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
-        if (result.resultCode == Activity.RESULT_OK) {
-            viewModel.onAuthorizationResult(result.data)
-        } else {
-            viewModel.onAuthorizationCancelled()
-        }
+    val exportLauncher = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("application/json")) { uri ->
+        uri?.let(viewModel::exportTo)
     }
-    LaunchedEffect(viewModel) {
-        viewModel.authRequests.collect { intent ->
-            authLauncher.launch(IntentSenderRequest.Builder(intent.intentSender).build())
-        }
+    val importLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+        uri?.let(viewModel::importFrom)
     }
     LaunchedEffect(viewModel) {
         viewModel.messages.collect { snackbarHostState.showSnackbar(it) }
@@ -178,15 +167,12 @@ fun SettingsScreen(
             }
         }
 
-        item { SectionHeader(stringResource(R.string.drive_title)) }
+        item { SectionHeader(stringResource(R.string.backup_title)) }
         item {
-            DriveCard(
+            BackupCard(
                 state = state,
-                onBackup = { viewModel.runDriveAction(DriveAction.Backup) },
-                onRestore = { dialog = SettingsDialog.ConfirmRestore },
-                onAutoBackupChange = { enabled ->
-                    if (enabled) viewModel.runDriveAction(DriveAction.EnableAutoBackup) else viewModel.disableAutoBackup()
-                },
+                onExport = { exportLauncher.launch(viewModel.exportFileName()) },
+                onImport = { dialog = SettingsDialog.ConfirmImport },
             )
         }
     }
@@ -230,12 +216,15 @@ fun SettingsScreen(
             onDismiss = { dialog = null },
             onConfirm = { viewModel.removeDrinkType(d.type); dialog = null },
         )
-        SettingsDialog.ConfirmRestore -> ConfirmDialog(
-            title = stringResource(R.string.drive_restore_confirm_title),
-            message = stringResource(R.string.drive_restore_confirm_message),
-            confirmLabel = stringResource(R.string.drive_restore),
+        SettingsDialog.ConfirmImport -> ConfirmDialog(
+            title = stringResource(R.string.backup_import_confirm_title),
+            message = stringResource(R.string.backup_import_confirm_message),
+            confirmLabel = stringResource(R.string.backup_import),
             onDismiss = { dialog = null },
-            onConfirm = { viewModel.runDriveAction(DriveAction.Restore); dialog = null },
+            onConfirm = {
+                dialog = null
+                importLauncher.launch(arrayOf("application/json", "application/octet-stream", "text/*"))
+            },
         )
     }
 }
@@ -254,22 +243,21 @@ private fun SectionHeader(text: String) {
 }
 
 @Composable
-private fun DriveCard(
+private fun BackupCard(
     state: SettingsUiState,
-    onBackup: () -> Unit,
-    onRestore: () -> Unit,
-    onAutoBackupChange: (Boolean) -> Unit,
+    onExport: () -> Unit,
+    onImport: () -> Unit,
 ) {
     Card(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            Text(stringResource(R.string.drive_desc), style = MaterialTheme.typography.bodyMedium)
-            val last = state.settings.lastBackupAt
+            Text(stringResource(R.string.backup_desc), style = MaterialTheme.typography.bodyMedium)
+            val last = state.settings.lastExportAt
             Text(
                 if (last == null) {
-                    stringResource(R.string.drive_never)
+                    stringResource(R.string.backup_never)
                 } else {
                     stringResource(
-                        R.string.drive_last_backup,
+                        R.string.backup_last_export,
                         Instant.ofEpochMilli(last).atZone(ZoneId.systemDefault())
                             .format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM, FormatStyle.SHORT)),
                     )
@@ -277,34 +265,19 @@ private fun DriveCard(
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
-            if (state.driveBusy) {
-                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    CircularProgressIndicator(Modifier.size(20.dp), strokeWidth = 2.dp)
-                    Text(stringResource(R.string.drive_working), style = MaterialTheme.typography.bodyMedium)
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                Button(onClick = onExport, enabled = !state.backupBusy, modifier = Modifier.weight(1f)) {
+                    Icon(Icons.Rounded.Upload, contentDescription = null)
+                    Text(stringResource(R.string.backup_export), modifier = Modifier.padding(start = 8.dp))
+                }
+                OutlinedButton(onClick = onImport, enabled = !state.backupBusy, modifier = Modifier.weight(1f)) {
+                    Icon(Icons.Rounded.Download, contentDescription = null)
+                    Text(stringResource(R.string.backup_import), modifier = Modifier.padding(start = 8.dp))
                 }
             }
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Button(onClick = onBackup, enabled = !state.driveBusy, modifier = Modifier.weight(1f)) {
-                    Icon(Icons.Rounded.CloudUpload, contentDescription = null)
-                    Text(stringResource(R.string.drive_backup_now), modifier = Modifier.padding(start = 8.dp))
-                }
-                OutlinedButton(onClick = onRestore, enabled = !state.driveBusy, modifier = Modifier.weight(1f)) {
-                    Icon(Icons.Rounded.CloudDownload, contentDescription = null)
-                    Text(stringResource(R.string.drive_restore), modifier = Modifier.padding(start = 8.dp))
-                }
+            if (state.backupBusy) {
+                CircularProgressIndicator(Modifier.size(20.dp).align(Alignment.CenterHorizontally), strokeWidth = 2.dp)
             }
-            ListItem(
-                colors = ListItemDefaults.colors(containerColor = Color.Transparent),
-                headlineContent = { Text(stringResource(R.string.drive_auto)) },
-                supportingContent = { Text(stringResource(R.string.drive_auto_desc)) },
-                trailingContent = {
-                    Switch(
-                        checked = state.settings.autoBackup,
-                        onCheckedChange = onAutoBackupChange,
-                        enabled = !state.driveBusy,
-                    )
-                },
-            )
         }
     }
 }

@@ -65,20 +65,15 @@
     <string name="remove">Remove</string>
     <string name="edit">Edit</string>
 
-    <string name="drive_title">Google Drive backup</string>
-    <string name="drive_desc">Your data is always saved on this phone. Back it up to your Google Drive to keep it safe or move it to a new phone.</string>
-    <string name="drive_backup_now">Back up now</string>
-    <string name="drive_restore">Restore</string>
-    <string name="drive_auto">Automatic daily backup</string>
-    <string name="drive_auto_desc">Backs up once a day when you\'re online</string>
-    <string name="drive_last_backup">Last backup: %1$s</string>
-    <string name="drive_never">Not backed up yet</string>
-    <string name="drive_working">Talking to Google Drive…</string>
-    <string name="drive_backup_done">Backup saved to Google Drive</string>
-    <string name="drive_restore_done">Data restored from Google Drive</string>
-    <string name="drive_no_backup">No backup found on Google Drive</string>
-    <string name="drive_cancelled">Google Drive access was not granted</string>
-    <string name="drive_error">Google Drive error: %1$s</string>
-    <string name="drive_restore_confirm_title">Restore from Google Drive?</string>
-    <string name="drive_restore_confirm_message">This replaces all drinks, drink types and settings on this phone with the latest backup.</string>
+    <string name="backup_title">Backup</string>
+    <string name="backup_desc">Your data is saved on this phone. Export a backup file to keep it safe (e.g. in Downloads, on an SD card or in any cloud app), and import it to restore your data or move it to a new phone.</string>
+    <string name="backup_export">Export</string>
+    <string name="backup_import">Import</string>
+    <string name="backup_last_export">Last export: %1$s</string>
+    <string name="backup_never">Not exported yet</string>
+    <string name="backup_export_done">Backup exported</string>
+    <string name="backup_import_done">Backup imported</string>
+    <string name="backup_error">Something went wrong: %1$s</string>
+    <string name="backup_import_confirm_title">Import backup?</string>
+    <string name="backup_import_confirm_message">This replaces all drinks, drink types and settings on this phone with the ones in the backup file you pick next.</string>
 </resources>
